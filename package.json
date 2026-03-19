@@ -1,0 +1,37 @@
+{
+  "name": "hot-iron-server-manager",
+  "version": "1.0.0",
+  "description": "A custom Minecraft server manager",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "author": "HIE - Ray (Gamma)",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^29.4.6",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "sudo-prompt": "^9.2.1"
+  },
+  "build": {
+    "appId": "com.hotironentertainment.servermanager",
+    "productName": "Hot Iron Server Manager",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "**/*",
+      "!servers"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "rpm",
+      "category": "Utility"
+    }
+  }
+}
