@@ -17,12 +17,16 @@ Also, to run an MC server- you WILL need Java 26.
 2. Download the "LTS" (Long Term Support) Windows Installer.
 3. Open the downloaded file and click "Next" through the standard installation process.  
    You can leave all the default settings exactly as they are.
+4. Go to command prompt/terminal and run:
+   `npm install electron --save-dev`
 
 ### FOR LINUX (Fedora):
 1. Open your Terminal.
 2. Type the following command and press Enter:  
    `sudo dnf install nodejs npm`
 3. Enter your password and type 'y' to confirm the installation.
+4. Go to terminal and run:
+   `sudo npm install electron --save-dev`
 
 **(For Ubuntu/Debian Linux users, use:** `sudo apt install nodejs npm`**)**
 
