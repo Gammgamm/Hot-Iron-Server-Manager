@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GammaRays Server Manager</title>
+    <style>
+        /* Gamma - Ray, HIE */
+        /* Server Card Styling */
+        .server-card {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .server-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: gray; /* Red for offline, Green for online */
+            margin-right: 8px;
+        }
+
+        /* The hidden console dropdown */
+        .server-console-area {
+            display: none; 
+            margin-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 15px;
+        }
+
+        .live-log {
+            background: black;
+            color: #00ff00;
+            height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+            padding: 10px;
+            font-size: 0.85em;
+            margin-bottom: 10px;
+        }
+        /* CSS Variables for Settings Control */
+        :root {
+            --bg-color: #1e1e1e;
+            --text-color: #ffffff;
+            --sidebar-bg: #2d2d2d;
+            --accent-color: #007acc;
+            --base-font-size: 16px;
+        }
+
+        .light-mode {
+            --bg-color: #f3f3f3;
+            --text-color: #121212;
+            --sidebar-bg: #e0e0e0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: var(--base-font-size);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            padding: 15px 20px;
+            text-align: left;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        #content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .view { display: none; }
+        .view.active { display: block; }
+
+        input, select, button {
+            font-size: 1em;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        button.action-btn { background-color: var(--accent-color); color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2 style="padding: 0 20px; font-size: 1.2em;">Dashboard</h2>
+        <button id="nav-setup" class="nav-btn active">Minecraft Server Setup</button>
+        <button id="nav-ports" class="nav-btn">Port Forwarding</button>
+        <button id="nav-select" class="nav-btn" style="display: none; border-left: 4px solid var(--accent-color);">My Servers</button>
+        <button id="nav-settings" class="nav-btn">Settings</button>
+    </div>
+
+    <div id="content">
+
+        <div id="setup-view" class="view active">
+            <h1>Minecraft Server Setup</h1>
+            <p>Create and configure your server instances here.</p>
+            
+            <label>Server Name:</label><br>
+            <input type="text" id="serverName" placeholder="My Server"><br>
+
+            <label>Server Port (Default: 25565):</label><br>
+            <input type="number" id="serverPort" value="25565"><br>
+
+            <label>RAM Allocation (GB): (4G for up to 80 mods/6 players)</label><br>
+            <input type="number" id="ramAmount" value="2" min="1" max="64"><br>
+
+            <label>Server Software:</label><br>
+            <select id="softwareSelect">
+                <option value="vanilla">Vanilla (Official)</option>
+                <option value="paper">Paper (Plugins)</option>
+                <option value="folia">Folia (High-Performance Plugins)</option>
+                <option value="fabric">Fabric (Mods)</option>
+                <option value="forge">Forge (Mods)</option>
+                <option value="neoforge">NeoForge (Mods)</option>
+            </select><br>
+
+            <label>Minecraft Version:</label><br>
+            <select id="versionSelect">
+                <option>Loading versions...</option>
+            </select><br>
+
+            <label>Custom Mods/Plugins Directory:</label><br>
+            <button class="action-btn" id="selectModDirBtn">Browse for Folder...</button>
+            <span id="modDirPath" style="font-size: 0.9em; opacity: 0.7;">No folder selected</span><br><br>
+
+            <button class="action-btn" id="createServerBtn" style="padding: 12px 24px;">Create Server</button>
+        </div>
+
+        <div id="ports-view" class="view">
+            <h1>Port Forwarding (Local Firewall)</h1>
+            <p>This tool will automatically open UDP and TCP ports (usually 25565) on this computer's firewall. <br>
+                <b>Note: This requires Admin/Root privileges.</b></p>
+            
+            <label>Port to Open:</label><br>
+            <input type="number" id="firewallPort" value="25565"><br>
+            <button class="action-btn" id="autoPortBtn" style="background: #dc3545;">Auto-Configure Firewall</button>
+            
+            <div style="margin-top: 30px; padding: 15px; background: rgba(0,0,0,0.1); border-left: 4px solid var(--accent-color);">
+                <h3>Next Step: Router Configuration</h3>
+                <p>After running the local tool, you must log into your home router and direct</p>
+                <p>external traffic on port 25565 to this computer's local IP address.</p>
+            </div>
+        </div>
+
+        <div id="settings-view" class="view">
+            <h1>App Settings</h1>
+            
+            <label>Theme:</label><br>
+            <select id="themeSelect">
+                <option value="dark">Dark Mode</option>
+                <option value="light">Light Mode</option>
+            </select><br><br>
+
+            <label>App Font Size:</label><br>
+            <input type="range" id="fontSizeSlider" min="12" max="24" value="16">
+            <span id="fontSizeDisplay">16px</span><br><br>
+
+            <hr style="border-color: rgba(128,128,128,0.2); margin: 30px 0;">
+
+            <h3>About Hot Iron Entertainment</h3>
+            <button class="action-btn" id="websiteBtn">Website WIP</button>
+        </div>
+
+        <div id="select-view" class="view">
+            <h1>My Servers</h1>
+            <p>Select a server to launch, stop, or manage it.</p>
+
+            <div id="serverListContainer" style="display: flex; flex-direction: column; gap: 15px;">
+                </div>
+
+        </div>
+
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
